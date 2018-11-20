@@ -17,8 +17,47 @@
 #ifndef _WORD_FILTER_
 #define _WORD_FILTER_
 #include "common.h"
+#include <map>
+#include <vector>
 
-std::u16string wf_keyword_generator(int unicode_range_min, int unicode_range_max, int keyword_len_max);
+std::u16string wf_keyword_generator(int keyword_len_max);
 int test_wf_keyword_generator();
+
+class DfaMap {
+public:
+    DfaMap(int level);
+    ~DfaMap();
+
+    int add(std::u16string &keyword);
+    int get(std::u16string &keyword);
+    void dump();
+    int isEnd();
+
+protected:
+    std::map<char16_t, DfaMap *> u16_map;
+    int level;
+    int is_end;
+
+public:
+    static DfaMap* gen(
+            int num_keywords, int keyword_len_max
+            , std::vector<std::u16string> &picked_up, int picked_up_num);
+};
+
+#if 0
+class WordFilter {
+public:
+    static WordFilter *create(int num_keywords, int keyword_len_max);
+    DfaMap *getRootMap();
+
+protected:
+    WordFilter();
+    ~WordFilter();
+
+protected:
+    DfaMap *root_dfa_map;
+    std::map<u16string> random_picked_up_keywords;
+};
+#endif
 
 #endif

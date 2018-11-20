@@ -23,6 +23,10 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
     int ret = -1;
+    unsigned int i;
+    string u8;
+    std::vector<std::u16string> picked_up;
+    DfaMap *root_map;
 
     if (test_cvt_utf8_utf16()) {
         printf("failed to test_cvt_utf8_utf16\n");
@@ -31,6 +35,16 @@ int main(int argc, char *argv[]) {
 
     test_rnd_gen();
     test_wf_keyword_generator();
+
+    root_map = DfaMap::gen(100/*000*/, 5, picked_up, 5);
+    for (i=0; i<picked_up.size(); i++) {
+        u8 = cvt_utf16_utf8(picked_up[i]);
+        printf("picked_up[%d]=%s\n", i, u8.c_str());
+    }
+   
+    printf("press any key to exit.\n");
+    getchar();
+    delete root_map;
 
     ret = 0;
 finally:
