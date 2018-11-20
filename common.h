@@ -23,11 +23,13 @@
 #include <locale>
 #include <string>
 #include <codecvt>
+#include <string.h>
 
 using namespace std;
 
 u16string cvt_utf8_utf16(string &str);
 string cvt_utf16_utf8(u16string &str);
 void utf16_hex(u16string &utf16) ;
+int test_cvt_utf8_utf16();
 
 #endif

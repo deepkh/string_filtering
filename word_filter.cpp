@@ -18,17 +18,13 @@
 
 int main(int argc, char *argv[]) {
     int ret = -1;
-    u16string utf16;
-    string str, utf8;
-    
-    str = "嘿，你好;Hello;السلام عليكم;नमस्ते;今日は おっす;ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ;안녕하십니까;chào bạn;வணக்கம் ;สวัสดี;નમસ્તે;မဂႆလာပၝ";
-    cout << str << endl;
 
-    utf16 = cvt_utf8_utf16(str);
-    utf16_hex(utf16);
-    
-    utf8 = cvt_utf16_utf8(utf16);
-    cout << utf8 << endl;
+    if (test_cvt_utf8_utf16()) {
+        printf("failed to test_cvt_utf8_utf16\n");
+        goto finally;
+    }
 
+    ret = 0;
+finally:
     return ret;
 }
