@@ -23,7 +23,7 @@ LDFLAGS=
 
 all: word_filter
 
-word_filter: word_filter.o common.o
+word_filter: word_filter.o common.o main.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 %.o: %.cpp

@@ -14,16 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _COMMON_
-#define _COMMON_
-#include <string>
+#ifndef _WORD_FILTER_
+#define _WORD_FILTER_
+#include "common.h"
 
-std::u16string cvt_utf8_utf16(std::string &str);
-std::string cvt_utf16_utf8(std::u16string &str);
-void utf16_hex(std::u16string &utf16) ;
-int test_cvt_utf8_utf16();
-
-int rnd_gen(int min, int max);
-int test_rnd_gen();
+std::u16string wf_keyword_generator(int unicode_range_min, int unicode_range_max, int keyword_len_max);
+int test_wf_keyword_generator();
 
 #endif

@@ -21,27 +21,18 @@
 
 using namespace std;
 
-u16string wf_keyword_generator(int unicode_range_min, int unicode_range_max, int keyword_len_max)
-{
-    int i;
-    int gen_num = rnd_gen(1, keyword_len_max+1);
-    u16string u16;
-    for (i=0; i<gen_num; i++) {
-        u16 += (char16_t)rnd_gen(unicode_range_min, unicode_range_max);
+int main(int argc, char *argv[]) {
+    int ret = -1;
+
+    if (test_cvt_utf8_utf16()) {
+        printf("failed to test_cvt_utf8_utf16\n");
+        goto finally;
     }
-    return u16;
-}
 
-int test_wf_keyword_generator()
-{
-    //0x4E00 ~ 0x9FCC: https://unicode-table.com/en/blocks/cjk-unified-ideographs/
-    u16string u16 = wf_keyword_generator(0x4E00, 0x9FCC, 12);
-    string u8 = cvt_utf16_utf8(u16);
+    test_rnd_gen();
+    test_wf_keyword_generator();
 
-    printf("-------test_wf_keyword_generator-------------------------------------------------------\n");
-    cout << u8 << endl;
-    utf16_hex(u16);
-    printf("\n-------------------------------------------------------------------------------------\n\n");
-
-    return 0;
+    ret = 0;
+finally:
+    return ret;
 }
