@@ -20,10 +20,14 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
+#include <locale>
+#include <string>
+#include <codecvt>
 
 using namespace std;
 
-wstring cvt_utf8_utf16x(string &utf8);
-void wstr_hex(const wchar_t *str, int len);
+u16string cvt_utf8_utf16(string &str);
+string cvt_utf16_utf8(u16string &str);
+void utf16_hex(u16string &utf16) ;
 
 #endif

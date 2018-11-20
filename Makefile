@@ -32,4 +32,3 @@ word_filter: word_filter.o common.o
 clean:
 	$(RM) *.o word_filter
 
-
