@@ -24,6 +24,7 @@
 #include <locale>
 #include <map>
 #include <stdarg.h>
+#include <time.h>
 
 static char _logstr[4096];
 
@@ -202,3 +203,18 @@ u16string &filter_u16(unsigned int num)
 
     return filter_words[num];
 }
+
+#define TICK_TIME_UNIT 1000000
+
+int64_t tick_time()
+{
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (int64_t) ts.tv_sec*TICK_TIME_UNIT+ts.tv_nsec/1000;
+}
+
+double tick_time_diff_secs(int64_t t2, int64_t t1)
+{
+    return (t2 - t1)/(double)TICK_TIME_UNIT;
+}
+

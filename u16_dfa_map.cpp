@@ -169,9 +169,9 @@ void U16DfaMap::test_static()
         "曹",
         "曹爽",
         "曹爽德",
-        "曹爽尖刀",
-        "曹爽尖刀一百塊",
-        "曹爽尖刀二百塊",
+        "曹爽德尖刀",
+        "曹爽德尖刀一百塊",
+        "曹爽德尖刀二百塊",
         "曹植白",
         "曹植",
         "曹植白",
@@ -223,6 +223,7 @@ void U16DfaMap::test_dynamic(int u16_string_range_min, int u16_string_range_max,
         "神父",
         "很髒",
         "浪費生命",
+        "神父旁邊",
         "關節炎",
         "醉漢",
      };
@@ -233,9 +234,10 @@ void U16DfaMap::test_dynamic(int u16_string_range_min, int u16_string_range_max,
     u16string test_text_u16 = cvt_utf8_utf16(test_text);
     u16string test_text_u16_filtered;
     int print = 0;
+    int64_t t1,t2,t3,t4;
 
     _log("-------U16DfaMap::test_dynamic-------------------------------------------------------\n");
-    _log("origin text %d:\n", test_text_u16.size());
+    _log("___origin text %d:\n", test_text_u16.size());
     _log("%s\n", test_text.c_str());
     //generate the randomly postion 
     for (i=0; i<test_u16_word_len; i++) {
@@ -250,9 +252,9 @@ void U16DfaMap::test_dynamic(int u16_string_range_min, int u16_string_range_max,
         }
         test_u16_pos[pos] = 1;
     }
-
     
-    _log("\n");
+    _log("\n___adding num of %d u16 filter string ...\n", num_u16_string_gen);
+    t1 = tick_time();
     //randomly generate the num_u16_string_gen of u16 string 
     for (i=0; i<(unsigned int) num_u16_string_gen; i++) {
         u16 = random_u16_string_generator(u16_string_range_min, u16_string_range_max, u16_string_len_max);
@@ -260,24 +262,33 @@ void U16DfaMap::test_dynamic(int u16_string_range_min, int u16_string_range_max,
         if (test_u16_pos[i]) {
             //add test_u16_word at pos of i
             u16 = cvt_utf8_utf16(test_u16_word[j]);
-            _log("add filter string %s at %d\n", test_u16_word[j].c_str(), i);
+            t3 = tick_time();
             root_map->add(u16, print);
+            t4 = tick_time();
+            _log("add filter string %s at %d. cost:%f\n", test_u16_word[j].c_str(), i,  tick_time_diff_secs(t4, t3));
             j++;
         }
     }
+    t2 = tick_time();
+    _log("___adding done. total cost:%f\n", num_u16_string_gen, tick_time_diff_secs(t2, t1));
 
+    t3 = tick_time();
+    _log("\n___filtering the origin text ...\n", num_u16_string_gen);
     //find if the test_u16_word is find in test_text
     for (i=0; i<test_text_u16.size(); i++) {
         ret = 0;
         for (j=i+2; j<test_text_u16.size(); j++) {
             u16 = test_text_u16.substr(i, j - i);
-            //u8 = cvt_utf16_utf8(u16);
             //_log("try to find %d-%d ", i, j - i);
+            t1 = tick_time();
             ret = root_map->find(u16, print);
+            t2 = tick_time();
             //_log(" %s\n", ret == 1 ? "found" : "");
 
             if (ret == 1) {
                 test_text_u16_filtered += filter_u16(j - i);
+                u8 = cvt_utf16_utf8(u16);
+                _log("found filter string %s at %d. cost:%f\n", u8.c_str(), i, tick_time_diff_secs(t2, t1));
                 i = j - 1;
                 break;
             }
@@ -288,8 +299,12 @@ void U16DfaMap::test_dynamic(int u16_string_range_min, int u16_string_range_max,
             test_text_u16_filtered += test_text_u16[i];
         }
     }
+    t4 = tick_time();
 
-    _log("\nafter filtering %d:\n", test_text_u16_filtered.size());
+    _log("___filtering done %d: total cost:%f\n", test_text_u16_filtered.size(), tick_time_diff_secs(t4, t3));
+
+
+    _log("\n___filtered results:\n");
     u8 = cvt_utf16_utf8(test_text_u16_filtered);
     _log("%s\n", u8.c_str());
     _log("-------------------------------------------------------------------------------------\n\n");

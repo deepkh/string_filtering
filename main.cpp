@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
     if (argc >= 2 && strcmp(argv[1], "-t") == 0) {
         return test();
     } else if (argc >= 2 && strcmp(argv[1], "-s") == 0) {
+        //test static
         U16DfaMap::test_static();
     } else {
         //test dynamic

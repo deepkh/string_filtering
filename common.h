@@ -17,6 +17,7 @@
 #ifndef _COMMON_
 #define _COMMON_
 #include <string>
+#include <inttypes.h>
 
 void __log(const char *file, int line, const char *fmt, ...);
 #define _log(fmt, ...) __log(NULL, 0, fmt, ##__VA_ARGS__)
@@ -37,4 +38,10 @@ int test_random_u16_string_generator(int u16_range_min, int u16_range_max, int u
 
 std::string &leveled_space(unsigned int lv);
 std::u16string &filter_u16(unsigned int num);
+
+//1/1000000000 sec
+int64_t tick_time();
+
+// secs
+double tick_time_diff_secs(int64_t t2, int64_t t1);
 #endif
