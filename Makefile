@@ -21,14 +21,14 @@ SHELL=/bin/sh
 CXXFLAGS = -I. -O2 -Wall -std=c++11 -g
 LDFLAGS=
 
-all: word_filter
+all: string_filtering
 
-word_filter: word_filter.o common.o main.o
+string_filtering: u16_dfa_map.o common.o main.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CFLAGS) -o $@ -c $<
 
 clean:
-	$(RM) *.o word_filter
+	$(RM) *.o string_filtering
 

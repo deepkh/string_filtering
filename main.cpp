@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "word_filter.h"
+#include "u16_dfa_map.h"
 #include <iostream>
 #include <stdio.h>
 #include <string.h>

@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "word_filter.h"
+#include "u16_dfa_map.h"
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
@@ -220,12 +220,13 @@ void U16DfaMap::test_dynamic(int u16_string_range_min, int u16_string_range_max,
     map<int,int> test_u16_pos;
     string test_u16_word[] = {
         "有一",
+        "神父",
         "很髒",
         "浪費生命",
         "關節炎",
         "醉漢",
      };
-    unsigned int test_u16_word_len = 5;
+    unsigned int test_u16_word_len = 6;
 
     string test_text = "有一有一個滿身酒氣的醉漢上了一班公共汽車，他坐在一個神父旁邊。那個醉漢的襯衫很髒，他的臉上有女人的亮紅唇印，口袋放著空酒瓶，他拿出他的報紙閱讀，過了一會兒，他問神父說： 「神父，得關節炎的原因是什麼？」「這位先生，它是因為浪費生命、和妓女鬼混、酗酒和不自重所引起的。」神父如是說。「噢，原來如此！」醉漢喃喃自語後繼續閱讀報紙。神父想了一下後，又向醉漢道歉說：「對不起，我剛剛講話是不應該這麼直接的，你患關節炎有多久了？」「不是我，神父，我衹是在報紙上看到教皇得了關節炎。」";
 
