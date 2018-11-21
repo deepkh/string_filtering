@@ -22,6 +22,31 @@
 #include <stdio.h>
 #include <string.h>
 #include <locale>
+#include <map>
+#include <stdarg.h>
+
+static char _logstr[4096];
+
+void __log(const char *file, int line, const char *fmt, ...)
+{
+	va_list args;
+	int n;
+	if (strlen(fmt) == 0) {
+		memset(_logstr, 0, sizeof(_logstr));
+		return;
+	}
+	va_start(args, fmt);
+	if (file && line) {
+		snprintf(_logstr, sizeof(_logstr)-1, "%s(%d): ", file, line);
+		n = strlen(_logstr);
+		vsnprintf (_logstr+n, sizeof(_logstr)-n-1, fmt, args);
+	} else {
+		vsnprintf (_logstr, sizeof(_logstr)-1, fmt, args);
+	}
+	va_end(args);
+    printf("%s", _logstr);
+}
+
 
 using namespace std;
 
@@ -31,34 +56,47 @@ u16string cvt_utf8_utf16(string &str) {
     return dest;
 }
 
+u16string cvt_utf8_utf16(char *u8c) {
+    string u8;
+    u8 += u8c;
+    return cvt_utf8_utf16(u8);
+}
+
 string cvt_utf16_utf8(u16string &str) {
     wstring_convert<std::codecvt_utf8_utf16<char16_t>,char16_t> conversion;
     string mbs = conversion.to_bytes((char16_t *) str.c_str());
     return mbs;
 }
 
+string cvt_utf16c_utf8(char16_t u16c)
+{
+    u16string u16;
+    u16 += u16c;
+    return cvt_utf16_utf8(u16);
+}
+
 void utf16_hex(u16string &utf16) {
     unsigned int i;
-    printf("dump %lu of utf-16 to hex\n", utf16.size());
+    _log("dump %lu of utf-16 to hex\n", utf16.size());
     for (i=0; i<utf16.size(); i++) {
         if ((i%16)== 0) {
-            printf("0x%08X ", i);
+            _log("0x%08X ", i);
         }
-        printf("%02X%02X "
+        _log("%02X%02X "
             , (utf16[i] >> 8) & 0xFF
             , utf16[i] & 0xFF);
         if ((i+1)%16 == 0) {
-            printf("\n");
+            _log("\n");
         }
     }
-    printf("\n");
+    _log("\n");
 }
 
 int test_cvt_utf8_utf16() {
     u16string utf16;
     string str, utf8;
     
-    printf("-------test_cvt_utf8_utf16-------------------------------------------------------\n");
+    _log("-------test_cvt_utf8_utf16-------------------------------------------------------\n");
     str = "嘿，你好;Hello;السلام عليكم;नमस्ते;今日は おっす;ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ;안녕하십니까;chào bạn;வணக்கம் ;สวัสดี;નમસ્તે;မဂႆလာပၝ";
     cout << str << endl;
 
@@ -68,7 +106,7 @@ int test_cvt_utf8_utf16() {
     utf8 = cvt_utf16_utf8(utf16);
     cout << utf8 << endl;
 
-    printf("-------------------------------------------------------------------------------------\n\n");
+    _log("-------------------------------------------------------------------------------------\n\n");
     return strcmp(str.c_str(), utf8.c_str());
 }
 
@@ -87,20 +125,80 @@ int test_rnd_gen() {
     static int max_num = 100;
     int *dist = (int *) calloc(1, sizeof(int) * max_num);
     int i;
-    printf("-------test_rnd_gen-------------------------------------------------------\n");
+    _log("-------test_rnd_gen-------------------------------------------------------\n");
     for (i=0; i<max_count; i++) {
         dist[rnd_gen(0, max_num)]++;
     }
     for (i=0; i<max_num; i++) {
         if ((i%16)== 0) {
-            printf("0x%08X ", i);
+            _log("0x%08X ", i);
         }
-        printf("%02d=%03d ", i, dist[i]);
+        _log("%02d=%03d ", i, dist[i]);
         if ((i+1)%16 == 0) {
-            printf("\n");
+            _log("\n");
         }
     }
-    printf("\n-------------------------------------------------------------------------------------\n\n");
+    _log("\n-------------------------------------------------------------------------------------\n\n");
     free(dist);
     return 0;
+}
+
+u16string random_u16_string_generator(int u16_range_min, int u16_range_max, int u16_string_len_max)
+{
+    int i;
+    int gen_num = 2 + rnd_gen(0, u16_string_len_max - 1);
+    u16string u16;
+    //_log("gen_num: %d\n", gen_num);
+    for (i=0; i<gen_num; i++) {
+        u16 += (char16_t)rnd_gen(u16_range_min, u16_range_max);
+    }
+    return u16;
+}
+
+int test_random_u16_string_generator(int u16_range_min, int u16_range_max, int u16_string_len_max)
+{
+    u16string u16 = random_u16_string_generator(u16_range_min, u16_range_max, u16_string_len_max);
+    string u8 = cvt_utf16_utf8(u16);
+
+    _log("-------test_random_u16_string_generator-------------------------------------------------------\n");
+    cout << u8 << endl;
+    utf16_hex(u16);
+    _log("-------------------------------------------------------------------------------------\n\n");
+
+    return 0;
+}
+
+string &leveled_space(unsigned int lv) {
+    static map<int, string> lv_space;
+    unsigned int i = 0;
+    string s = "";
+
+    if (lv == 0) {
+        lv_space[lv] = string("");
+    } else if ((s = lv_space[lv]) == "") {
+        for (i=0; i<lv; i++) {
+            s += "   ";
+        }
+        lv_space[lv] = s;
+    }
+
+    return lv_space[lv];
+}
+
+u16string &filter_u16(unsigned int num)
+{
+    static map<int, u16string> filter_words;
+    unsigned int i = 0;
+    u16string s = u"";
+
+    if (num == 0) {
+        filter_words[num] = u"";
+    } else if ((s = filter_words[num]) == u"") {
+        for (i=0; i<num; i++) {
+            s += u"*";
+        }
+        filter_words[num] = s;
+    }
+
+    return filter_words[num];
 }

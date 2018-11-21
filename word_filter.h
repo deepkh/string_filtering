@@ -20,44 +20,26 @@
 #include <map>
 #include <vector>
 
-std::u16string wf_keyword_generator(int keyword_len_max);
-int test_wf_keyword_generator();
-
-class DfaMap {
+class U16DfaMap {
 public:
-    DfaMap(int level);
-    ~DfaMap();
+    U16DfaMap(int level);
+    ~U16DfaMap();
 
-    int add(std::u16string &keyword);
-    int get(std::u16string &keyword);
+    int add(std::u16string &u16, int print);
+    U16DfaMap *get(char16_t u16c);
     void dump();
     int isEnd();
+    int find(std::u16string &u16, int print);
 
 protected:
-    std::map<char16_t, DfaMap *> u16_map;
+    std::map<char16_t, U16DfaMap *> u16_map;
     int level;
     int is_end;
 
 public:
-    static DfaMap* gen(
-            int num_keywords, int keyword_len_max
-            , std::vector<std::u16string> &picked_up, int picked_up_num);
+    static void test_static();
+    static void test_dynamic(int u16_string_range_min, int u16_string_range_max, int u16_string_len_max, int num_u16_string_gen);
 };
 
-#if 0
-class WordFilter {
-public:
-    static WordFilter *create(int num_keywords, int keyword_len_max);
-    DfaMap *getRootMap();
-
-protected:
-    WordFilter();
-    ~WordFilter();
-
-protected:
-    DfaMap *root_dfa_map;
-    std::map<u16string> random_picked_up_keywords;
-};
-#endif
 
 #endif

@@ -19,34 +19,40 @@
 #include <stdio.h>
 #include <string.h>
 
+//0x4E00 ~ 0x9FCC: https://unicode-table.com/en/blocks/cjk-unified-ideographs/
+#define U16_STRING_RANGE_MIN 0x4E00
+#define U16_STRING_RANGE_MAX 0x9FCC
+#define U16_STRING_LEN_MAX 6
+#define NUM_U16_STRING_GEN 200000
+
 using namespace std;
 
-int main(int argc, char *argv[]) {
-    int ret = -1;
-    unsigned int i;
-    string u8;
-    std::vector<std::u16string> picked_up;
-    DfaMap *root_map;
-
+static int test() {
     if (test_cvt_utf8_utf16()) {
-        printf("failed to test_cvt_utf8_utf16\n");
-        goto finally;
+        _log("failed to test_cvt_utf8_utf16\n");
+        return -1;
     }
 
     test_rnd_gen();
-    test_wf_keyword_generator();
+    test_random_u16_string_generator(U16_STRING_RANGE_MIN, U16_STRING_RANGE_MAX, U16_STRING_LEN_MAX);
+    return 0;
+}
 
-    root_map = DfaMap::gen(100/*000*/, 5, picked_up, 5);
-    for (i=0; i<picked_up.size(); i++) {
-        u8 = cvt_utf16_utf8(picked_up[i]);
-        printf("picked_up[%d]=%s\n", i, u8.c_str());
+int main(int argc, char *argv[]) {
+    string u8;
+    std::vector<std::u16string> picked_up;
+
+    //test function
+    if (argc >= 2 && strcmp(argv[1], "-t") == 0) {
+        return test();
+    } else if (argc >= 2 && strcmp(argv[1], "-s") == 0) {
+        U16DfaMap::test_static();
+    } else {
+        //test dynamic
+        U16DfaMap::test_dynamic(U16_STRING_RANGE_MIN, U16_STRING_RANGE_MAX, U16_STRING_LEN_MAX, NUM_U16_STRING_GEN);
     }
    
-    printf("press any key to exit.\n");
+    _log("press any key to exit.\n");
     getchar();
-    delete root_map;
-
-    ret = 0;
-finally:
-    return ret;
+    return 0;
 }

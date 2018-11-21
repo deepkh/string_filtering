@@ -21,111 +21,278 @@
 
 using namespace std;
 
-//0x4E00 ~ 0x9FCC: https://unicode-table.com/en/blocks/cjk-unified-ideographs/
-//#define UNICODE_KEYWORD_RANGE_MIN 0x4E00
-//#define UNICODE_KEYWORD_RANGE_MAX 0x9FCC
-#define UNICODE_KEYWORD_RANGE_MIN 0x564F
-#define UNICODE_KEYWORD_RANGE_MAX 0x565F
 
-u16string wf_keyword_generator(int keyword_len_max)
-{
-    int i;
-    int gen_num = 2 + rnd_gen(0, keyword_len_max - 1);
-    u16string u16;
-    //printf("gen_num: %d\n", gen_num);
-    for (i=0; i<gen_num; i++) {
-        u16 += (char16_t)rnd_gen(UNICODE_KEYWORD_RANGE_MIN, UNICODE_KEYWORD_RANGE_MAX);
-    }
-    return u16;
-}
-
-int test_wf_keyword_generator()
-{
-    u16string u16 = wf_keyword_generator(5);
-    string u8 = cvt_utf16_utf8(u16);
-
-    printf("-------test_wf_keyword_generator-------------------------------------------------------\n");
-    cout << u8 << endl;
-    utf16_hex(u16);
-    printf("-------------------------------------------------------------------------------------\n\n");
-
-    return 0;
-}
-
-
-DfaMap::DfaMap(int level)
+U16DfaMap::U16DfaMap(int level)
 :level(level)
 ,is_end(0)
 {
 
 }
 
-DfaMap::~DfaMap()
+U16DfaMap::~U16DfaMap()
 {
 
 }
 
-int DfaMap::add(std::u16string &keyword)
+//ret = 0 -> no added;
+//ret = 1 -> added;
+//ret = -1 -> error
+int U16DfaMap::add(std::u16string &u16, int print)
 {
+    char16_t u16c;
+    U16DfaMap *node;
+    u16string u16_next;
+    const char *space = leveled_space(level).c_str();
+    int lastest_ch = (u16.size() - 1) <= 0 ? 1 : 0;
 
-    return 0;
+    //add new node
+    u16c = u16[0];
+    node = get(u16c);
+    if (node == NULL) {
+        node = new U16DfaMap(level+1);
+        u16_map[u16c] = node;
+        if (print) {
+            _log("%sadd %s \n", space, cvt_utf16c_utf8(u16c).c_str());
+        }
+
+        //lastest char, lastest node, is_end = 1
+        if (lastest_ch) {
+            if (print) {
+                _log("%sis_end=1, ret 1 \n", space);
+            }
+            node->is_end = 1;
+            return 1;
+        }
+
+    //get exists node
+    } else {
+        if (print) {
+            _log("%sget %s \n", space, cvt_utf16c_utf8(u16c).c_str());
+        }
+
+        //lastest char, not lastest node, is_end = 0, no added
+        if (lastest_ch) {
+            if (print) {
+                _log("%sis_end=0, no added, ret 0 \n", space);
+            }
+            return 0;
+        }
+    }
+
+    //not lastest node, keep going
+    u16_next = u16.substr(1, u16.size() - 1);
+    node->is_end = 0;
+    return node->add(u16_next, print);
 }
 
-int DfaMap::get(std::u16string &keyword)
+U16DfaMap *U16DfaMap::get(char16_t u16c)
 {
-
-    return 0;
+    return u16_map[u16c];
 }
 
-void DfaMap::dump()
+void U16DfaMap::dump()
 {
-
+    map<char16_t, U16DfaMap *>::iterator it;
+    string space = leveled_space(level);
+    
+    for (it = u16_map.begin(); it != u16_map.end(); ++it) {
+        _log("%s", space.c_str());
+        _log("%s %d\n", cvt_utf16c_utf8(it->first).c_str(), it->second->isEnd());
+        it->second->dump();
+    }
 }
 
-int DfaMap::isEnd()
+int U16DfaMap::isEnd()
 {
-
-    return 0;
+    return is_end;
 }
 
-DfaMap* DfaMap::gen(
-    int num_keywords, int keyword_len_max
-    , std::vector<u16string> &picked_up
-    , int picked_up_num)
+//ret = 0 -> found, but is_end = 0;
+//ret = 1 -> found, is_end = 1
+//ret = -1 -> not found
+int U16DfaMap::find(std::u16string &u16, int print)
 {
-    int i, pos;
-    DfaMap *root_map = new DfaMap(0);
+    char16_t u16c;
+    U16DfaMap *node;
+    u16string u16_next;
+    int lastest_ch = (u16.size() - 1) <= 0 ? 1 : 0;
+    string space = leveled_space(level);
+
+    u16c = u16[0];
+    node = get(u16c);
+
+    //node not found
+    if (node == NULL) {
+        return -1;
+    //get exists node
+    } else {
+        if (print) {
+            _log("%sget %s \n", space.c_str(), cvt_utf16c_utf8(u16c).c_str());
+        }
+
+        //lastest char
+        if (lastest_ch) {
+            //lastest char, is_end = 1
+            if (node->isEnd()) {
+                if (print) {
+                    _log("%sis_end=1, found str, ret 1 \n", space.c_str());
+                }
+                return 1;
+            }
+
+            //lastest char, is_end = 0
+            if (print) {
+                _log("%sis_end=0, not end, ret 0 \n", space.c_str());
+            }
+            return 0;
+        }
+    }
+
+    //not lastest node, keep going
+    u16_next = u16.substr(1, u16.size() - 1);
+    return node->find(u16_next, print);
+}
+
+void U16DfaMap::test_static()
+{
+    string u8a[] = {
+        "甘",
+        "甘寧娘親娘",
+        "甘寧娘",
+        "甘寧親娘",
+        "甘寧",
+        "甘寧的娘親",
+        "甘寧的親娘",
+        "甘寧的娘",
+        "甘寧的娘親娘",
+        "甘寧的娘親娘握指能打牆",
+        "曹",
+        "曹爽",
+        "曹爽德",
+        "曹爽尖刀",
+        "曹爽尖刀一百塊",
+        "曹爽尖刀二百塊",
+        "曹植白",
+        "曹植",
+        "曹植白",
+        "曹植白素藍嬌",
+        "曹植白樹懶",
+        "曹植白花轎",
+        "Yo!",
+        "Yo!What's up",
+        "Yo!What's up man",
+        "Yo!What's up the fu*k man",
+    };
+    unsigned int i, len = 21/*25*/;
+    U16DfaMap *root_map = new U16DfaMap(0);
+    u16string u16;
+   
+    _log("-------U16DfaMap::test_static::add-------------------------------------------------------\n");
+    for (i=0; i<len; i++) {
+        _log("\ntry to add '%s'\n", u8a[i].c_str());
+        u16 = cvt_utf8_utf16(u8a[i]);
+        root_map->add(u16, 1);
+    }
+    _log("-------U16DfaMap::test_static::dump-------------------------------------------------------\n");
+    root_map->dump();
+
+    _log("-------U16DfaMap::test_static::find-------------------------------------------------------\n");
+
+    for (i=0; i<len; i++) {
+        _log("try to find '%s' ", u8a[i].c_str());
+        u16 = cvt_utf8_utf16(u8a[i]);
+        _log(" %s\n", root_map->find(u16, 0) == 1 ? "found" : " ");
+    }
+
+    _log("-------------------------------------------------------------------------------------\n\n");
+
+    delete root_map;
+}
+
+void U16DfaMap::test_dynamic(int u16_string_range_min, int u16_string_range_max, int u16_string_len_max, int num_u16_string_gen)
+{
+    unsigned int i, j =0 ,pos;
+    int ret;
+    U16DfaMap *root_map = new U16DfaMap(0);
     u16string u16;
     string u8;
-    map<int,int> picked_up_pos;
 
-    printf("-------DfaMap::gen-------------------------------------------------------\n");
-    //generate the position of random pick up keyword
-    for (i=0; i<picked_up_num; i++) {
+    map<int,int> test_u16_pos;
+    string test_u16_word[] = {
+        "有一",
+        "很髒",
+        "浪費生命",
+        "關節炎",
+        "醉漢",
+     };
+    unsigned int test_u16_word_len = 5;
+
+    string test_text = "有一有一個滿身酒氣的醉漢上了一班公共汽車，他坐在一個神父旁邊。那個醉漢的襯衫很髒，他的臉上有女人的亮紅唇印，口袋放著空酒瓶，他拿出他的報紙閱讀，過了一會兒，他問神父說： 「神父，得關節炎的原因是什麼？」「這位先生，它是因為浪費生命、和妓女鬼混、酗酒和不自重所引起的。」神父如是說。「噢，原來如此！」醉漢喃喃自語後繼續閱讀報紙。神父想了一下後，又向醉漢道歉說：「對不起，我剛剛講話是不應該這麼直接的，你患關節炎有多久了？」「不是我，神父，我衹是在報紙上看到教皇得了關節炎。」";
+
+    u16string test_text_u16 = cvt_utf8_utf16(test_text);
+    u16string test_text_u16_filtered;
+    int print = 0;
+
+    _log("-------U16DfaMap::test_dynamic-------------------------------------------------------\n");
+    _log("origin text %d:\n", test_text_u16.size());
+    _log("%s\n", test_text.c_str());
+    //generate the randomly postion 
+    for (i=0; i<test_u16_word_len; i++) {
         //guarantee we won't be duplicated
         while(1) {
-            pos = rnd_gen(0, num_keywords - 1); 
-            if (picked_up_pos[pos]) {
-                printf("%d duplicated\n", pos);
+            pos = rnd_gen(0, num_u16_string_gen - 1); 
+            if (test_u16_pos[pos]) {
+                _log("%d duplicated\n", pos);
                 continue;
             }
             break;
         }
-        picked_up_pos[pos] = 1;
+        test_u16_pos[pos] = 1;
     }
 
-    //generate the num_keywords of random u16 string
-    for (i=0; i<num_keywords; i++) {
-        u16 = wf_keyword_generator(keyword_len_max);
-        u8 = cvt_utf16_utf8(u16);
-        printf("gen %d/%d=%s %s\n", i, num_keywords, u8.c_str(), picked_up_pos[i] ? "PICKED" : "");
-        if (picked_up_pos[i]) {
-            picked_up.push_back(u16);
+    
+    _log("\n");
+    //randomly generate the num_u16_string_gen of u16 string 
+    for (i=0; i<(unsigned int) num_u16_string_gen; i++) {
+        u16 = random_u16_string_generator(u16_string_range_min, u16_string_range_max, u16_string_len_max);
+        root_map->add(u16, print);
+        if (test_u16_pos[i]) {
+            //add test_u16_word at pos of i
+            u16 = cvt_utf8_utf16(test_u16_word[j]);
+            _log("add filter string %s at %d\n", test_u16_word[j].c_str(), i);
+            root_map->add(u16, print);
+            j++;
         }
     }
 
-    printf("-------------------------------------------------------------------------------------\n\n");
-    return root_map;
+    //find if the test_u16_word is find in test_text
+    for (i=0; i<test_text_u16.size(); i++) {
+        ret = 0;
+        for (j=i+2; j<test_text_u16.size(); j++) {
+            u16 = test_text_u16.substr(i, j - i);
+            //u8 = cvt_utf16_utf8(u16);
+            //_log("try to find %d-%d ", i, j - i);
+            ret = root_map->find(u16, print);
+            //_log(" %s\n", ret == 1 ? "found" : "");
+
+            if (ret == 1) {
+                test_text_u16_filtered += filter_u16(j - i);
+                i = j - 1;
+                break;
+            }
+            //getchar();
+        }
+
+        if (ret != 1) {
+            test_text_u16_filtered += test_text_u16[i];
+        }
+    }
+
+    _log("\nafter filtering %d:\n", test_text_u16_filtered.size());
+    u8 = cvt_utf16_utf8(test_text_u16_filtered);
+    _log("%s\n", u8.c_str());
+    _log("-------------------------------------------------------------------------------------\n\n");
+    delete root_map;
 }
 
 
