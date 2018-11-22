@@ -28,6 +28,49 @@ Screenshot
 
 ![Yo](output.PNG)
 
+How to use?
+-------
+
+*	**Create dictionary**
+  
+	`U16DfaMap *root_map = new U16DfaMap(0);`
+	
+*	**Add sensitive word to dictionary**
+
+	```
+	u16string u16 = cvt_utf8_utf16(string("utf-8 based sensitive word"));
+	root_map->add(u16, print);
+	```
+	
+*	**Find text from dictionary**
+
+	The ret will return `1` is means sensitive word found from dictionary and also the lastest node, `0` is is means sensitive word found but not the lastest node and `-1` is not sensitive word found.
+	```
+	int ret = root_map->find(u16, /*print*/0);
+	```
+	
+*	**Free the dictionary**
+
+	`delete root_map`
+
+Compling
+-------
+
+Need gcc-5.2.0 unix environment. Use the followings command to build.
+
+```
+make
+```
+
+and use the followings command to clean.
+
+```
+make clean
+```
+
+That's all. Thanks!
+
+
 License
 -------
 
