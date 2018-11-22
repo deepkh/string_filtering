@@ -8,7 +8,7 @@ Feature
 
 *	**Pure C++ 11, Zero-dependency**
   
-	`Only` need gcc-5.2 and above for support UTF-16/UTF-8 convertor `<codecvt>`.
+	Need gcc-5.2 and above for support UTF-16/UTF-8 convertor `<codecvt>`.
 	
 *	**Less dictionary memory usage**
 
