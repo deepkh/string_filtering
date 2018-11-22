@@ -28,7 +28,7 @@ Feature
 Screenshot
 -------
 
-![Yo](output.png)
+![Yo](output.PNG)
 
 License
 -------
