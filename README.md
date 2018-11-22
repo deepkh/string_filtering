@@ -1,9 +1,7 @@
 ﻿string_filtering
 =======
 
-`string_filtering` is a UTF-8/UTF-16 sensitive word filtering program that can filtering a sensitive word from a large dictionary. 
-
-The dictionary design was reference from [Java实现敏感词过滤](https://blog.csdn.net/chenssy/article/details/26961957) but instead of C++ implements.
+`string_filtering` is a UTF-8/UTF-16 sensitive word filtering program that can filtering a sensitive word from a large dictionary. The dictionary design was reference from [Java实现敏感词过滤](https://blog.csdn.net/chenssy/article/details/26961957) but instead of C++ implements.
 
 Feature
 --------
