@@ -31,7 +31,13 @@ U16DfaMap::U16DfaMap(int level)
 
 U16DfaMap::~U16DfaMap()
 {
-
+    map<char16_t, U16DfaMap *>::iterator it = u16_map.begin();
+    //string space = leveled_space(level);
+    while (it != u16_map.end()) {
+        //_log("%sdelete %s\n", space.c_str(), cvt_utf16c_utf8(it->first).c_str());
+        delete it->second;
+        it = u16_map.erase(it);
+    }
 }
 
 //ret = 0 -> no added;

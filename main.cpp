@@ -23,7 +23,7 @@
 #define U16_STRING_RANGE_MIN 0x4E00
 #define U16_STRING_RANGE_MAX 0x9FCC
 #define U16_STRING_LEN_MAX 6
-#define NUM_U16_STRING_GEN 200000
+#define NUM_U16_STRING_GEN 2000000
 
 using namespace std;
 
@@ -42,8 +42,8 @@ int main(int argc, char *argv[]) {
     string u8;
     std::vector<std::u16string> picked_up;
 
-    //test function
     if (argc >= 2 && strcmp(argv[1], "-t") == 0) {
+        //test function
         return test();
     } else if (argc >= 2 && strcmp(argv[1], "-s") == 0) {
         //test static
