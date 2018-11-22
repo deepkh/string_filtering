@@ -10,11 +10,6 @@ Feature
   
 	Need gcc-5.2 and above for support UTF-16/UTF-8 convertor `<codecvt>`.
 	
-*	**Less dictionary memory usage**
-
-	It's about 1MB for storing for amoung `2000k` sensitive word. 
-	Every sensitive word about `2~5` UTF-16 characters. 
-
 *	**UTF-8 /UTF-16 aware**
 
 	Can support UTF-8/UTF-16 for input string. 
